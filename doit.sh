@@ -4,19 +4,19 @@ rm -rf build
 
 mkdir build
 cd build && cmake \
+        -DCMAKE_C_FLAGS:STRING="-I/opt/local/include -I/opt/local/include/db62" \
         -DCMAKE_C_FLAGS_RELEASE:STRING="-DNDEBUG" \
         -DCMAKE_CXX_FLAGS_RELEASE:STRING="-DNDEBUG" \
         -DCMAKE_Fortran_FLAGS_RELEASE:STRING="-DNDEBUG" \
         -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-        -DCMAKE_INSTALL_PREFIX:PATH=/usr \
-        -DINCLUDE_INSTALL_DIR:PATH=/usr/include \
-        -DLIB_INSTALL_DIR:PATH=/usr/lib64 \
-        -DSYSCONF_INSTALL_DIR:PATH=/etc \
-        -DSHARE_INSTALL_PREFIX:PATH=/usr/share \
-        -DLIB_SUFFIX=64 \
+        -DCMAKE_INSTALL_PREFIX:PATH=/opt/local \
+        -DINCLUDE_INSTALL_DIR:PATH=/opt/local/include \
+        -DLIB_INSTALL_DIR:PATH=/opt/local/lib \
+        -DSYSCONF_INSTALL_DIR:PATH=/opt/local/etc \
+        -DSHARE_INSTALL_PREFIX:PATH=/opt/local/share \
         -DBUILD_SHARED_LIBS:BOOL=ON \
     -DRPM5=1                                    \
-    -DFEDORA=1                                    \
+    -DMACOSX=1                                    \
     -DENABLE_RPMDB=ON                             \
     -DENABLE_RPMDB_BYRPMHEADER=ON                 \
     -DENABLE_RPMMD=ON                             \
@@ -30,6 +30,6 @@ cd build && cmake \
     -DENABLE_HELIXREPO=ON     \
     -DMULTI_SYMANTICS=ON \
     -DENABLE_COMPLEX_DEPS=1 \
-    -DENABLE_PERL=ON \
-    -DENABLE_RUBY=ON \
+    -DENABLE_PERL=OFF \
+    -DENABLE_RUBY=OFF \
 	../
