@@ -52,9 +52,10 @@ selection_prune(Pool *pool, Queue *selection)
 	{
 	  Solvable *s;
 	  Repo *repo = pool_id2repo(pool, selection->elements[i + 1]);
-	  if (repo)
+	  if (repo) {
 	    FOR_REPO_SOLVABLES(repo, p, s)
 	      break;
+          }
 	}
       else
 	{
@@ -95,9 +96,10 @@ selection_solvables(Pool *pool, Queue *selection, Queue *pkgs)
 	{
 	  Solvable *s;
 	  Repo *repo = pool_id2repo(pool, selection->elements[i + 1]);
-	  if (repo)
+	  if (repo) {
 	    FOR_REPO_SOLVABLES(repo, p, s)
 	      queue_push(pkgs, p);
+          }
 	}
       else
 	{
@@ -1099,9 +1101,10 @@ selection_filter(Pool *pool, Queue *sel1, Queue *sel2)
 	{
 	  Solvable *s;
 	  Repo *repo = pool_id2repo(pool, sel2->elements[i + 1]);
-	  if (repo)
+	  if (repo) {
 	    FOR_REPO_SOLVABLES(repo, p, s)
 	      map_set(&m2, p);
+          }
 	}
       else
 	{
@@ -1162,7 +1165,7 @@ selection_filter(Pool *pool, Queue *sel1, Queue *sel2)
 	{
 	  Solvable *s;
 	  Repo *repo = pool_id2repo(pool, sel1->elements[i + 1]);
-	  if (repo)
+	  if (repo) {
 	    FOR_REPO_SOLVABLES(repo, p, s)
 	      {
 	        if (map_tst(&m2, p))
@@ -1170,6 +1173,7 @@ selection_filter(Pool *pool, Queue *sel1, Queue *sel2)
 	        else
 	          miss = 1;
 	      }
+           }
 	}
       else
 	{

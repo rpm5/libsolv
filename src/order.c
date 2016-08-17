@@ -540,6 +540,7 @@ breakcycle(struct orderdata *od, Id *cycle)
   POOL_DEBUG(SOLV_DEBUG_STATS, "\n");
 }
 
+#if 0
 static inline void
 dump_tes(struct orderdata *od)
 {
@@ -570,6 +571,7 @@ dump_tes(struct orderdata *od)
 	}
     }
 }
+#endif
 
 static void
 reachable(struct orderdata *od, Id i)
@@ -1261,9 +1263,10 @@ transaction_check_order(Transaction *trans)
   POOL_DEBUG(SOLV_DEBUG_RESULT, "\nchecking transaction order...\n");
   map_init(&ins, pool->nsolvables);
   map_init(&seen, pool->nsolvables);
-  if (pool->installed)
+  if (pool->installed) {
     FOR_REPO_SOLVABLES(pool->installed, p, s)
       MAPSET(&ins, p);
+  }
   lastins = 0;
   for (i = 0; i < trans->steps.count; i++)
     {

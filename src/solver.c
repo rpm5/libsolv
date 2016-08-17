@@ -3140,9 +3140,10 @@ solver_calculate_multiversionmap(Pool *pool, Queue *job, Map *multiversionmap)
 	{
 	  Solvable *s;
 	  Repo *repo = pool_id2repo(pool, what);
-	  if (repo)
+	  if (repo) {
 	    FOR_REPO_SOLVABLES(repo, p, s)
 	      MAPSET(multiversionmap, p);
+          }
 	}
       FOR_JOB_SELECT(p, pp, select, what)
         MAPSET(multiversionmap, p);
@@ -3946,9 +3947,10 @@ solver_solve(Solver *solv, Queue *job)
 	  else if (select == SOLVER_SOLVABLE_REPO)
 	    {
 	      Repo *repo = pool_id2repo(pool, what);
-	      if (repo)
+	      if (repo) {
 		FOR_REPO_SOLVABLES(repo, p, s)
 		  solver_addjobrule(solv, -p, 0, 0, i, weak);
+              }
 	    }
 #ifdef ENABLE_COMPLEX_DEPS
 	  else if ((select == SOLVER_SOLVABLE_PROVIDES || select == SOLVER_SOLVABLE_NAME) && pool_is_complex_dep(pool, what))
@@ -4022,9 +4024,10 @@ solver_solve(Solver *solv, Queue *job)
           else if (select == SOLVER_SOLVABLE_REPO)
 	    {
 	      Repo *repo = pool_id2repo(pool, what);
-	      if (repo)
+	      if (repo) {
 	        FOR_REPO_SOLVABLES(repo, p, s)
 	          solver_addjobrule(solv, installed && pool->solvables[p].repo == installed ? p : -p, 0, 0, i, weak);
+              }
 	    }
 	  FOR_JOB_SELECT(p, pp, select, what)
 	    solver_addjobrule(solv, installed && pool->solvables[p].repo == installed ? p : -p, 0, 0, i, weak);
@@ -4715,9 +4718,10 @@ pool_job2solvables(Pool *pool, Queue *pkgs, Id how, Id what)
     {
       Repo *repo = pool_id2repo(pool, what);
       Solvable *s;
-      if (repo)
+      if (repo) {
 	FOR_REPO_SOLVABLES(repo, p, s)
 	  queue_push(pkgs, p);
+      }
     }
   else
     {
@@ -4872,9 +4876,10 @@ solver_get_userinstalled(Solver *solv, Queue *q, int flags)
 	    map_grow(&userinstalled, installed->end - installed->start);
 	  what = solv->job.elements[i + 1];
 	  select = how & SOLVER_SELECTMASK;
-	  if (select == SOLVER_SOLVABLE_ALL || (select == SOLVER_SOLVABLE_REPO && what == installed->repoid))
+	  if (select == SOLVER_SOLVABLE_ALL || (select == SOLVER_SOLVABLE_REPO && what == installed->repoid)) {
 	    FOR_REPO_SOLVABLES(installed, p, s)
 	      MAPSET(&userinstalled, p - installed->start);
+          }
 	  FOR_JOB_SELECT(p, pp, select, what)
 	    if (pool->solvables[p].repo == installed)
 	      MAPSET(&userinstalled, p - installed->start);
