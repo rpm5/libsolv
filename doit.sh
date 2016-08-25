@@ -3,17 +3,15 @@
 rm -rf build
 
 mkdir build
-cd build && cmake \
+cd build
+
+cmake \
         -DCMAKE_C_FLAGS:STRING="-I/opt/local/include -I/opt/local/include/db62"\
         -DCMAKE_C_FLAGS_RELEASE:STRING="-DNDEBUG" \
-        -DCMAKE_CXX_FLAGS_RELEASE:STRING="-DNDEBUG" \
-        -DCMAKE_Fortran_FLAGS_RELEASE:STRING="-DNDEBUG" \
         -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
         -DCMAKE_INSTALL_PREFIX:PATH=/opt/local \
         -DINCLUDE_INSTALL_DIR:PATH=/opt/local/include \
         -DLIB_INSTALL_DIR:PATH=/opt/local/lib \
-        -DSYSCONF_INSTALL_DIR:PATH=/opt/local/etc \
-        -DSHARE_INSTALL_PREFIX:PATH=/opt/local/share \
         -DBUILD_SHARED_LIBS:BOOL=ON \
     -DRPM5=1 \
     -DMACOSX=1 \
@@ -28,14 +26,12 @@ cd build && cmake \
     -DENABLE_DEBIAN=ON \
     -DENABLE_ARCHREPO=ON \
     -DENABLE_HELIXREPO=ON \
-    -DMULTI_SYMANTICS=ON \
+    -DMULTI_SEMANTICS=ON \
     -DENABLE_COMPLEX_DEPS=1 \
     -DENABLE_PERL=OFF \
     -DENABLE_RUBY=OFF \
 	../
 
-cd build
-make
-make test
+make && make test && sudo make install
 
-sudo make install
+otool -L /opt/local/lib/libsolv.0.dylib

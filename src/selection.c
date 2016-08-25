@@ -943,7 +943,7 @@ selection_make_matchdeps(Pool *pool, Queue *selection, const char *name, int fla
 	    }
 	}
     }
-  if ((flags & SELECTION_GLOB) != 0 && !strpbrk(rname, "[*?") != 0)
+  if ((flags & SELECTION_GLOB) != 0 && (!strpbrk(rname, "[*?")) != 0)
     flags &= ~SELECTION_GLOB;
 
   queue_init(&q);

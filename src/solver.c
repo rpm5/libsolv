@@ -1420,13 +1420,15 @@ reorder_dq_for_jobrules(Solver *solv, int level, Queue *dq)
 	  dq->elements[i] = 0;
         }
     }
-  for (i = j = 0; i < dq->count; i++)
+  for (i = j = 0; i < dq->count; i++) {
     if (dq->elements[i])
       dq->elements[j++] = dq->elements[i];
+  }
   queue_truncate(dq, j);
-  FOR_REPO_SOLVABLES(solv->installed, p, s)
+  FOR_REPO_SOLVABLES(solv->installed, p, s) {
     if (solv->decisionmap[p] == level + 1)
       solv->decisionmap[p] = 0;
+  }
   if (solv->decisionq.count != decisionqcount)
     {
       solv->recommends_index = -1;
@@ -3141,8 +3143,9 @@ solver_calculate_multiversionmap(Pool *pool, Queue *job, Map *multiversionmap)
 	  Solvable *s;
 	  Repo *repo = pool_id2repo(pool, what);
 	  if (repo) {
-	    FOR_REPO_SOLVABLES(repo, p, s)
+	    FOR_REPO_SOLVABLES(repo, p, s) {
 	      MAPSET(multiversionmap, p);
+	    }
           }
 	}
       FOR_JOB_SELECT(p, pp, select, what)
@@ -3595,8 +3598,9 @@ solver_solve(Solver *solv, Queue *job)
 		    solv->bestupdatemap_all = 1;
 		  if (how & SOLVER_CLEANDEPS)
 		    {
-		      FOR_REPO_SOLVABLES(installed, p, s)
+		      FOR_REPO_SOLVABLES(installed, p, s) {
 			add_cleandeps_package(solv, p);
+		      }
 		    }
 		}
 	      else if (select == SOLVER_SOLVABLE_REPO)
@@ -3611,16 +3615,18 @@ solver_solve(Solver *solv, Queue *job)
 			solv->bestupdatemap_all = 1;
 		      if (how & SOLVER_CLEANDEPS)
 			{
-			  FOR_REPO_SOLVABLES(installed, p, s)
+			  FOR_REPO_SOLVABLES(installed, p, s) {
 			    add_cleandeps_package(solv, p);
+			  }
 			}
 		      break;
 		    }
 		  if (solv->noautotarget && !(how & SOLVER_TARGETED))
 		    break;
 		  /* targeted update */
-		  FOR_REPO_SOLVABLES(repo, p, s)
+		  FOR_REPO_SOLVABLES(repo, p, s) {
 		    add_update_target(solv, p, how);
+		  }
 		}
 	      else
 		{
@@ -3687,12 +3693,14 @@ solver_solve(Solver *solv, Queue *job)
 	transform_update_targets(solv);
 
       oldnrules = solv->nrules;
-      FOR_REPO_SOLVABLES(installed, p, s)
+      FOR_REPO_SOLVABLES(installed, p, s) {
 	solver_addpkgrulesforsolvable(solv, s, &addedmap);
+      }
       POOL_DEBUG(SOLV_DEBUG_STATS, "added %d pkg rules for installed solvables\n", solv->nrules - oldnrules);
       oldnrules = solv->nrules;
-      FOR_REPO_SOLVABLES(installed, p, s)
+      FOR_REPO_SOLVABLES(installed, p, s) {
 	solver_addpkgrulesforupdaters(solv, s, &addedmap, 1);
+      }
       POOL_DEBUG(SOLV_DEBUG_STATS, "added %d pkg rules for updaters of installed solvables\n", solv->nrules - oldnrules);
     }
 
@@ -3948,9 +3956,10 @@ solver_solve(Solver *solv, Queue *job)
 	    {
 	      Repo *repo = pool_id2repo(pool, what);
 	      if (repo) {
-		FOR_REPO_SOLVABLES(repo, p, s)
+		FOR_REPO_SOLVABLES(repo, p, s) {
 		  solver_addjobrule(solv, -p, 0, 0, i, weak);
-              }
+		}
+	      }
 	    }
 #ifdef ENABLE_COMPLEX_DEPS
 	  else if ((select == SOLVER_SOLVABLE_PROVIDES || select == SOLVER_SOLVABLE_NAME) && pool_is_complex_dep(pool, what))
@@ -4025,9 +4034,10 @@ solver_solve(Solver *solv, Queue *job)
 	    {
 	      Repo *repo = pool_id2repo(pool, what);
 	      if (repo) {
-	        FOR_REPO_SOLVABLES(repo, p, s)
+	        FOR_REPO_SOLVABLES(repo, p, s) {
 	          solver_addjobrule(solv, installed && pool->solvables[p].repo == installed ? p : -p, 0, 0, i, weak);
-              }
+		}
+	      }
 	    }
 	  FOR_JOB_SELECT(p, pp, select, what)
 	    solver_addjobrule(solv, installed && pool->solvables[p].repo == installed ? p : -p, 0, 0, i, weak);
@@ -4719,8 +4729,9 @@ pool_job2solvables(Pool *pool, Queue *pkgs, Id how, Id what)
       Repo *repo = pool_id2repo(pool, what);
       Solvable *s;
       if (repo) {
-	FOR_REPO_SOLVABLES(repo, p, s)
+	FOR_REPO_SOLVABLES(repo, p, s) {
 	  queue_push(pkgs, p);
+	}
       }
     }
   else
@@ -4877,8 +4888,9 @@ solver_get_userinstalled(Solver *solv, Queue *q, int flags)
 	  what = solv->job.elements[i + 1];
 	  select = how & SOLVER_SELECTMASK;
 	  if (select == SOLVER_SOLVABLE_ALL || (select == SOLVER_SOLVABLE_REPO && what == installed->repoid)) {
-	    FOR_REPO_SOLVABLES(installed, p, s)
+	    FOR_REPO_SOLVABLES(installed, p, s) {
 	      MAPSET(&userinstalled, p - installed->start);
+	    }
           }
 	  FOR_JOB_SELECT(p, pp, select, what)
 	    if (pool->solvables[p].repo == installed)
@@ -5067,8 +5079,9 @@ pool_add_userinstalled_jobs(Pool *pool, Queue *q, Queue *job, int flags)
       queue_init(&invq);
       if ((flags & GET_USERINSTALLED_NAMEARCH) != 0)
 	flags &= ~GET_USERINSTALLED_NAMES;	/* just in case */
-      FOR_REPO_SOLVABLES(pool->installed, p, s)
+      FOR_REPO_SOLVABLES(pool->installed, p, s) {
 	queue_push(&invq, flags & GET_USERINSTALLED_NAMES ? s->name : p);
+      }
       if ((flags & GET_USERINSTALLED_NAMEARCH) != 0)
 	{
 	  /* for namearch we convert to packages */

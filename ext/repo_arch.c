@@ -30,7 +30,7 @@ static long long parsenum(unsigned char *p, int cnt)
   if (*p & 0x80)
     {
       /* binary format */
-      x = *p & 0x40 ? (-1 << 8 | *p)  : (*p ^ 0x80);
+      x = *p & 0x40 ? (((unsigned)-1) << 8 | *p)  : (*p ^ 0x80);
       while (--cnt > 0)
 	x = (x << 8) | *p++;
       return x;
