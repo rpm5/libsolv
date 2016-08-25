@@ -208,7 +208,7 @@ write_id(Repodata *data, Id x)
     }
 }
 
-#if 0
+#ifdef	UNUSED
 static inline void
 write_id_eof(Repodata *data, Id x, int eof)
 {
@@ -216,7 +216,7 @@ write_id_eof(Repodata *data, Id x, int eof)
     x = (x & 63) | ((x & ~63) << 1);
   write_id(data, x | (eof ? 0 : 64));
 }
-#endif
+#endif	/* UNUSED */
 
 
 
@@ -578,7 +578,7 @@ data_addblob(struct extdata *xd, unsigned char *blob, int len)
   xd->len += len;
 }
 
-#if 0
+#ifdef	UNUSED
 static inline void
 data_addu32(struct extdata *xd, unsigned int num)
 {
@@ -589,7 +589,7 @@ data_addu32(struct extdata *xd, unsigned int num)
   d[3] = num;
   data_addblob(xd, d, 4);
 }
-#endif
+#endif	/* UNUSED */
 
 static Id
 putinownpool(struct cbdata *cbdata, Stringpool *ss, Id id)
