@@ -634,7 +634,7 @@ typedef int bool;
 #include "selection.h"
 
 #include "repo_write.h"
-#ifdef ENABLE_RPMDB
+#if defined(ENABLE_RPMDB) || defined(ENABLE_RPMPKG)
 #include "repo_rpmdb.h"
 #endif
 #ifdef ENABLE_PUBKEY
@@ -1990,6 +1990,8 @@ rb_eval_string(
   bool add_rpmdb_reffp(FILE *reffp, int flags = 0) {
     return repo_add_rpmdb_reffp($self, reffp, flags) == 0;
   }
+#endif
+#ifdef ENABLE_RPMPKG
   %newobject add_rpm;
   XSolvable *add_rpm(const char *name, int flags = 0) {
     return new_XSolvable($self->pool, repo_add_rpm($self, name, flags));
@@ -2961,6 +2963,12 @@ rb_eval_string(
   int evrcmp(XSolvable *s2) {
     return pool_evrcmp($self->pool, $self->pool->solvables[$self->id].evr, s2->pool->solvables[s2->id].evr, EVRCMP_COMPARE);
   }
+#ifdef SWIGRUBY
+  %rename("matchesdep?") matchesdep;
+#endif
+  bool matchesdep(Id keyname, DepId id, Id marker = -1) {
+    return solvable_matchesdep($self->pool->solvables + $self->id, keyname, id, marker);
+  }
 
 #if defined(SWIGTCL)
   %rename("==") __eq__;
@@ -3278,6 +3286,9 @@ rb_eval_string(
   static const int SOLVER_FLAG_FOCUS_INSTALLED = SOLVER_FLAG_FOCUS_INSTALLED;
   static const int SOLVER_FLAG_YUM_OBSOLETES = SOLVER_FLAG_YUM_OBSOLETES;
   static const int SOLVER_FLAG_NEED_UPDATEPROVIDE = SOLVER_FLAG_NEED_UPDATEPROVIDE;
+  static const int SOLVER_FLAG_FOCUS_BEST = SOLVER_FLAG_FOCUS_BEST;
+  static const int SOLVER_FLAG_STRONG_RECOMMENDS = SOLVER_FLAG_STRONG_RECOMMENDS;
+  static const int SOLVER_FLAG_INSTALL_ALSO_UPDATES = SOLVER_FLAG_INSTALL_ALSO_UPDATES;
 
   static const int SOLVER_REASON_UNRELATED = SOLVER_REASON_UNRELATED;
   static const int SOLVER_REASON_UNIT_RULE = SOLVER_REASON_UNIT_RULE;

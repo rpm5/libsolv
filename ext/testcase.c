@@ -115,6 +115,9 @@ static struct solverflags2str {
   { SOLVER_FLAG_YUM_OBSOLETES,              "yumobsoletes", 0 },
   { SOLVER_FLAG_NEED_UPDATEPROVIDE,         "needupdateprovide", 0 },
   { SOLVER_FLAG_URPM_REORDER,               "urpmreorder", 0 },
+  { SOLVER_FLAG_FOCUS_BEST,                 "focusbest", 0 },
+  { SOLVER_FLAG_STRONG_RECOMMENDS,          "strongrecommends", 0 },
+  { SOLVER_FLAG_INSTALL_ALSO_UPDATES,       "installalsoupdates", 0 },
   { 0, 0, 0 }
 };
 
@@ -767,6 +770,7 @@ testcase_str2solvid(Pool *pool, const char *str)
 	  evrid = pool_strn2id(pool, str + i + 1, repostart - (i + 1), 0);
 	  if (!evrid)
 	    continue;
+	  /* first check whatprovides */
 	  FOR_PROVIDES(p, pp, nid)
 	    {
 	      Solvable *s = pool->solvables + p;
@@ -777,6 +781,31 @@ testcase_str2solvid(Pool *pool, const char *str)
 	      if (arch && s->arch != arch)
 		continue;
 	      return p;
+	    }
+	  /* maybe it's not installable and thus not in whatprovides. do a slow search */
+	  if (repo)
+	    {
+	      Solvable *s;
+	      FOR_REPO_SOLVABLES(repo, p, s)
+		{
+		  if (s->name != nid || s->evr != evrid)
+		    continue;
+		  if (arch && s->arch != arch)
+		    continue;
+		  return p;
+		}
+	    }
+	  else
+	    {
+	      FOR_POOL_SOLVABLES(p)
+		{
+		  Solvable *s = pool->solvables + p;
+		  if (s->name != nid || s->evr != evrid)
+		    continue;
+		  if (arch && s->arch != arch)
+		    continue;
+		  return p;
+		}
 	    }
 	}
     }
@@ -2480,6 +2509,7 @@ testcase_read(Pool *pool, FILE *fp, const char *testcase, Queue *job, char **res
   int missing_features = 0;
   Id *genid = 0;
   int ngenid = 0;
+  Queue autoinstq;
 
   if (!fp && !(fp = fopen(testcase, "r")))
     {
@@ -2495,6 +2525,7 @@ testcase_read(Pool *pool, FILE *fp, const char *testcase, Queue *job, char **res
   buf = solv_malloc(bufl);
   bufp = buf;
   solv = 0;
+  queue_init(&autoinstq);
   for (;;)
     {
       if (bufp - buf + 16 > bufl)
@@ -2849,6 +2880,15 @@ testcase_read(Pool *pool, FILE *fp, const char *testcase, Queue *job, char **res
 	    }
 	  genid[ngenid++] = id;
 	}
+      else if (!strcmp(pieces[0], "autoinst") && npieces > 2)
+	{
+	  if (strcmp(pieces[1], "name"))
+	    {
+	      pool_debug(pool, SOLV_ERROR, "testcase_read: autoinst: illegal mode\n");
+	      break;
+	    }
+	  queue_push(&autoinstq, pool_str2id(pool, pieces[2], 1));
+	}
       else
 	{
 	  pool_debug(pool, SOLV_ERROR, "testcase_read: cannot parse command '%s'\n", pieces[0]);
@@ -2856,6 +2896,9 @@ testcase_read(Pool *pool, FILE *fp, const char *testcase, Queue *job, char **res
     }
   while (job && ngenid > 0)
     queue_push2(job, SOLVER_NOOP | SOLVER_SOLVABLE_PROVIDES, genid[--ngenid]);
+  if (autoinstq.count)
+    pool_add_userinstalled_jobs(pool, &autoinstq, job, GET_USERINSTALLED_NAMES | GET_USERINSTALLED_INVERTED);
+  queue_free(&autoinstq);
   genid = solv_free(genid);
   buf = solv_free(buf);
   pieces = solv_free(pieces);

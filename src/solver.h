@@ -44,6 +44,7 @@ struct _Solver {
    */
   Rule *rules;				/* all rules */
   Id nrules;				/* [Offset] index of the last rule */
+  Id lastpkgrule;			/* last package rule we added */
 
   Queue ruleassertions;			/* Queue of all assertion rules */
 
@@ -107,18 +108,12 @@ struct _Solver {
   /* our decisions: */
   Queue decisionq;                      /* >0:install, <0:remove/conflict */
   Queue decisionq_why;			/* index of rule, Offset into rules */
+  Queue decisionq_reason;		/* reason for decision, indexed by level */
 
   Id *decisionmap;			/* map for all available solvables,
 					 * = 0: undecided
 					 * > 0: level of decision when installed,
 					 * < 0: level of decision when conflict */
-
-  int decisioncnt_jobs;
-  int decisioncnt_update;
-  int decisioncnt_keep;
-  int decisioncnt_resolve;
-  int decisioncnt_weak;
-  int decisioncnt_orphan;
 
   /* learnt rule history */
   Queue learnt_why;
@@ -166,8 +161,11 @@ struct _Solver {
   int bestobeypolicy;			/* true: stay in policy with the best rules */
   int noautotarget;			/* true: do not assume targeted for up/dup jobs that contain no installed solvable */
   int focus_installed;			/* true: resolve update rules first */
+  int focus_best;			/* true: resolve job dependencies first */
   int do_yum_obsoletes;			/* true: add special yumobs rules */
   int urpmreorder;			/* true: do special urpm package reordering */
+  int strongrecommends;			/* true: create weak rules for recommends */
+  int install_also_updates;		/* true: do not prune install job rules to installed packages */
 
   Map dupmap;				/* dup these packages*/
   int dupmap_all;			/* dup all packages */
@@ -203,6 +201,11 @@ struct _Solver {
   Queue *favorq;
   Map favormap;				/* favored / disfavored packages */
   Map isdisfavormap;
+
+  int installedpos;			/* for resolve_installed */
+  int do_extra_reordering;		/* reorder for future installed packages */
+
+  Queue *recommendsruleq;		/* pkg rules comming from recommends */
 #endif	/* LIBSOLV_INTERNAL */
 };
 
@@ -309,6 +312,9 @@ typedef struct _Solver Solver;
 #define SOLVER_FLAG_YUM_OBSOLETES		21
 #define SOLVER_FLAG_NEED_UPDATEPROVIDE		22
 #define SOLVER_FLAG_URPM_REORDER		23
+#define SOLVER_FLAG_FOCUS_BEST			24
+#define SOLVER_FLAG_STRONG_RECOMMENDS		25
+#define SOLVER_FLAG_INSTALL_ALSO_UPDATES	26
 
 #define GET_USERINSTALLED_NAMES			(1 << 0)	/* package names instead of ids */
 #define GET_USERINSTALLED_INVERTED		(1 << 1)	/* autoinstalled */

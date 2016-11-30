@@ -1263,10 +1263,11 @@ transaction_check_order(Transaction *trans)
   POOL_DEBUG(SOLV_DEBUG_RESULT, "\nchecking transaction order...\n");
   map_init(&ins, pool->nsolvables);
   map_init(&seen, pool->nsolvables);
-  if (pool->installed) {
-    FOR_REPO_SOLVABLES(pool->installed, p, s)
-      MAPSET(&ins, p);
-  }
+  if (pool->installed)
+    {
+      FOR_REPO_SOLVABLES(pool->installed, p, s)
+        MAPSET(&ins, p);
+    }
   lastins = 0;
   for (i = 0; i < trans->steps.count; i++)
     {
